@@ -5,19 +5,19 @@
 <title>LiveLog</title>
 </head>
 <body>
-<!-- included at bottom 
+<!-- included at bottom
 
 	<script src="http://code.jquery.com/jquery-1.7.2.min.js"></script>  -->
 
 
 <!-- <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.18/jquery-ui.min.js"></script>  -->
-<!-- 
+<!--
 <link rel="stylesheet" href="demos.css">
 <link rel="stylesheet" href="http://jqueryui.com/themes/base/jquery.ui.all.css"> -->
 <style>
-textarea {   
-   font-family:Arial;  
-   font-size: 14px;   
+textarea {
+   font-family:Arial;
+   font-size: 14px;
 
 }
 #tags {
@@ -40,6 +40,7 @@ textarea {
 </div>
 
 <button id="h"></button>
+<button id="sortBtn">Sort by Date</button>
 
 </div><!-- End demo -->
 
@@ -57,12 +58,24 @@ textarea {
 
 <br />
 <br />
-To export letterspace docs:
+To export letterspace docs into one ubernote saved on your Desktop as UBERNOTE.txt":
+Run export-letterspace-to-ubernote-thoughtstream.sh
   <pre>
-  	cd /Users/jacob/Library/Containers/com.x10studio.LetterspaceMac/Data/Documents/Home
-  	cat $(ls -t) > allLetterSpaceNotes.backup.txt
-  </pre>
+    #!/bin/bash
 
+    echo "replacing spaces in filenames with underscores...";
+
+    for f in *\ *; do mv "$f" "${f// /_}"; done;
+
+    echo "done";
+
+    echo "concatenating all notes into one ubernote saved on your Desktop as UBERNOTE.txt"
+
+    stat -l -t '%F %T' /Users/jacobcole/Library/Containers/com.x10studio.LetterspaceMac/Data/Documents/Home/*| awk '{print "OBSCURESTRINGTHATWONTBEDUPLICATED" system("cat " $8) "\n\n" "********** " $6 " **********" "\n"}' | sed '/OBSCURESTRINGTHATWONTBEDUPLICATED/d' >> ~/Desktop/UBERNOTE.txt
+
+    echo "done"
+  </pre>
+<sub>Note before modifying - parsing date requires \n as first line and ********** before and after date</sub>
 
 
 
@@ -73,14 +86,14 @@ To export letterspace docs:
 <script>
  $(document).ready(function(){
   	 function findTags(txt,tag) {
-		 if(tag.length <=0) 
+		 if(tag.length <=0)
 		 	return txt
 		 tag = tag.toLowerCase()
 		 out=""
 
 		 //offs=0;
 		 txt=txt.toLowerCase().split("\n\n")
-		 
+
 		 for (p in txt) {
 			//alert(txt[p])
 		 	if(txt[p].indexOf(""+tag)>=0)
@@ -105,10 +118,10 @@ To export letterspace docs:
 	 function excludeS(txt) {
 	 	out=""
 	 	txt=txt.toLowerCase().split("\n")
-		 
+
 		 for (p in txt) {
 			//alert(txt[p])
-		 	
+
 	 		if(txt[p].indexOf("-.-")>=0 || txt[p].indexOf("on*")>=0 || txt[p].indexOf("#reme")>=0 )
 		 		continue;
 
@@ -118,7 +131,7 @@ To export letterspace docs:
 		 return out
 
 	 }
-		
+
 
 	var hash_regexp = /[#]([a-zA-Z0-9@.\-\/"&;”“*]+)/g;
 
@@ -129,8 +142,61 @@ To export letterspace docs:
 
 
  		$("#se").keyup(function(e) {
-			$('#log').val(findTags($('#logh').val(),$('#se').val()))		 
+			$('#log').val(findTags($('#logh').val(),$('#se').val()))
 		});
+
+		$("#sortBtn").click(function(e) {
+
+      var DELIM=" **********\n"
+      var sortedNotes = $('#log').val().split(DELIM).sort(function(a,b) {
+
+        var DATE_STAR_LEN="********** 2015-02-10".length
+        var STAR_SPACE="********** "
+
+        var aDate=a.substr(Math.max(0,a.length-DATE_STAR_LEN));
+        var bDate=b.substr(Math.max(0,b.length-DATE_STAR_LEN));
+
+        if(aDate.substr(0,STAR_SPACE.length)==STAR_SPACE && bDate.substr(0,STAR_SPACE.length)==STAR_SPACE) {
+          aDate=aDate.substr(STAR_SPACE.length)
+          bDate=bDate.substr(STAR_SPACE.length)
+          return aDate > bDate ? -1 : aDate == bDate ? 0: 1
+
+        }
+        else {
+          console.log(a,b)
+
+          console.error("Malformed note date")
+          console.log(aDate)
+          console.log(bDate)
+          console.log("----------------")
+          return aDate.length != 2 ? 1 : -1
+        }
+
+
+        // var aDate = a.split(\n********** )
+        // var bDate = b.split(\n********** )
+        //
+        // if(aDate.length == 2 && bDate.length == 2) {
+        //   aDate=aDate[1]
+        //   bDate=bDate[1]
+        //   return aDate > bDate ? -1 : aDate == bDate ? 0: 1
+        // }
+        // else {
+        //   console.err("Malformed note date")
+        //   return aDate.length != 2 ? 1 : -1
+        // }
+
+      })
+
+      if(sortedNotes.length > 0)
+        sortedNotes[0]=DELIM+sortedNotes[0]
+
+      sortedNotes=sortedNotes.join(DELIM);
+
+			$('#log').val(sortedNotes)
+			$('#logh').val(sortedNotes)
+		});
+
 
 		$("#h").click(function(e) {
 			$('#log').val(excludeS($('#log').val()))
@@ -143,14 +209,14 @@ To export letterspace docs:
 
 
 		$("#log").keyup(function(e) {
-		 	$('#logh').val($('#log').val());		
-		 	
+		 	$('#logh').val($('#log').val());
+
 		 	clearTimeout(updTagsTo)
 		 	updTagsTo=window.setTimeout(function() {
 		 	 	var tags = extractTags($('#log').val())
 			 	if(tags!=null && tags.length>0) {
 			 		for(i in tags) {
-			 			
+
 				 			// tags[i]='<a href="#" class="taglink">'+tags[i]+'</a>'
 				 			tags[i]='<a href="'+tags[i]+'" class="taglink">'+tags[i]+'</a>'
 			 		}
@@ -165,7 +231,7 @@ To export letterspace docs:
 			console.log($(this))
 			$("#se").val($(this).text())
 		})
-		
+
      });
    </script>
 <script>
@@ -198,7 +264,7 @@ To export letterspace docs:
 			source: availableTags,
 			minLength: 0
 		});
-		
+
 		$( "#se" ).autocomplete( "search" , "" )*/
 	});
 	</script>
