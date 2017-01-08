@@ -1,8 +1,8 @@
 import datetime
 
 import os
-from os import listdir
-from os.path import isfile, join, expanduser
+from os import listdir, mkdir
+from os.path import isfile, join, expanduser, isdir
 
 home = expanduser("~")
 
@@ -32,7 +32,8 @@ for note in allNotes:
 
 	ubernote=ubernote + note[0] + "\n\n********** " + str(date) + " **********\n\n"
 
-
+if not os.path.isdir(home+'/code/LiveLog/ubernotes/'):
+	os.mkdir(home+'/code/LiveLog/ubernotes/')
 
 with open(home+'/code/LiveLog/ubernotes/ubernote-py.txt', 'w+') as ubernote_file:
 	    ubernote_file.write(ubernote)
