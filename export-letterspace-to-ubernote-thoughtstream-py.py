@@ -2,13 +2,14 @@ import datetime
 
 import os
 from os import listdir
-from os.path import isfile, join
+from os.path import isfile, join, expanduser
 
+home = expanduser("~")
 
 
 allNotes=[];
 
-os.chdir("/Users/jacob/Library/Containers/com.x10studio.LetterspaceMac/Data/Documents/Home")
+os.chdir(home+"/Library/Containers/com.x10studio.LetterspaceMac/Data/Documents/Home")
 mypath = os.getcwd()
 
 onlyfiles = [f for f in listdir(mypath) if isfile(join(mypath, f))]
@@ -33,10 +34,10 @@ for note in allNotes:
 
 
 
-with open('/Users/jacob/Documents/ubernote-py.txt', 'w+') as ubernote_file:
+with open(home+'/code/LiveLog/ubernotes/ubernote-py.txt', 'w+') as ubernote_file:
 	    ubernote_file.write(ubernote)
 
 
 print ubernote[0:1000]
 
-print "\n\n\n\nExport to /Users/jacob/Documents/ubernote-py.txt successful"
+print "\n\n\n\nExport to ~/code/LiveLog/ubernotes/ubernote-py.txt successful"
