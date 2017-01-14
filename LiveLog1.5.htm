@@ -39,8 +39,7 @@ textarea {
 	<button id="clear">Clear</button>
 </div>
 
-<button id="h"></button>
-<button id="sortBtn">Sort by Date</button>
+<button style="float:right" id="h"></button>
 
 </div><!-- End demo -->
 
@@ -50,7 +49,7 @@ textarea {
 <br />
 <input type="hidden" id="logh" />
 <input type="hidden" id="tagsh" />
-<textarea cols="150" rows="30" id="log" tabindex="1"></textarea>
+<textarea style="width:900px" rows="30" id="log" tabindex="1"></textarea>
 
 
 <div id="tags">
@@ -58,24 +57,12 @@ textarea {
 
 <br />
 <br />
-To export letterspace docs into one ubernote saved on your Desktop as UBERNOTE.txt":
-Run export-letterspace-to-ubernote-thoughtstream.sh
+To export letterspace docs:
   <pre>
-    #!/bin/bash
-
-    echo "replacing spaces in filenames with underscores...";
-
-    for f in *\ *; do mv "$f" "${f// /_}"; done;
-
-    echo "done";
-
-    echo "concatenating all notes into one ubernote saved on your Desktop as UBERNOTE.txt"
-
-    stat -l -t '%F %T' /Users/jacobcole/Library/Containers/com.x10studio.LetterspaceMac/Data/Documents/Home/*| awk '{print "OBSCURESTRINGTHATWONTBEDUPLICATED" system("cat " $8) "\n\n" "********** " $6 " **********" "\n"}' | sed '/OBSCURESTRINGTHATWONTBEDUPLICATED/d' >> ~/Desktop/UBERNOTE.txt
-
-    echo "done"
+  	cd /Users/jacob/Library/Containers/com.x10studio.LetterspaceMac/Data/Documents/Home
+  	cat $(ls -t) > allLetterSpaceNotes.backup.txt
   </pre>
-<sub>Note before modifying - parsing date requires \n as first line and ********** before and after date</sub>
+
 
 
 
@@ -85,6 +72,9 @@ Run export-letterspace-to-ubernote-thoughtstream.sh
 </script>
 <script>
  $(document).ready(function(){
+
+
+
   	 function findTags(txt,tag) {
 		 if(tag.length <=0)
 		 	return txt
@@ -145,57 +135,6 @@ Run export-letterspace-to-ubernote-thoughtstream.sh
 			$('#log').val(findTags($('#logh').val(),$('#se').val()))
 		});
 
-		$("#sortBtn").click(function(e) {
-
-      var DELIM=" **********\n"
-      var sortedNotes = $('#log').val().split(DELIM).sort(function(a,b) {
-
-        var DATE_STAR_LEN="********** 2015-02-10".length
-        var STAR_SPACE="********** "
-
-        var aDate=a.substr(Math.max(0,a.length-DATE_STAR_LEN));
-        var bDate=b.substr(Math.max(0,b.length-DATE_STAR_LEN));
-
-        if(aDate.substr(0,STAR_SPACE.length)==STAR_SPACE && bDate.substr(0,STAR_SPACE.length)==STAR_SPACE) {
-          aDate=aDate.substr(STAR_SPACE.length)
-          bDate=bDate.substr(STAR_SPACE.length)
-          return aDate > bDate ? -1 : aDate == bDate ? 0: 1
-
-        }
-        else {
-          console.log(a,b)
-
-          console.error("Malformed note date")
-          console.log(aDate)
-          console.log(bDate)
-          console.log("----------------")
-          return aDate.length != 2 ? 1 : -1
-        }
-
-
-        // var aDate = a.split(\n********** )
-        // var bDate = b.split(\n********** )
-        //
-        // if(aDate.length == 2 && bDate.length == 2) {
-        //   aDate=aDate[1]
-        //   bDate=bDate[1]
-        //   return aDate > bDate ? -1 : aDate == bDate ? 0: 1
-        // }
-        // else {
-        //   console.err("Malformed note date")
-        //   return aDate.length != 2 ? 1 : -1
-        // }
-
-      })
-
-      if(sortedNotes.length > 0)
-        sortedNotes[0]=DELIM+sortedNotes[0]
-
-      sortedNotes=sortedNotes.join(DELIM);
-
-			$('#log').val(sortedNotes)
-			$('#logh').val(sortedNotes)
-		});
 
 
 		$("#h").click(function(e) {
@@ -208,7 +147,8 @@ Run export-letterspace-to-ubernote-thoughtstream.sh
 		});
 
 
-		$("#log").keyup(function(e) {
+		function logKeyUp() {
+
 		 	$('#logh').val($('#log').val());
 
 		 	clearTimeout(updTagsTo)
@@ -224,13 +164,22 @@ Run export-letterspace-to-ubernote-thoughtstream.sh
 			 	}
 		 	},500)
 
-		});
+
+		}
+
+		$("#log").keyup(logKeyUp);
 
 		$(document).on("click",".taglink",function(e) {
 			e.preventDefault()
 			console.log($(this))
-			$("#se").val($(this).text())
+			$("#se").val($(this).text()).keyup()
+
 		})
+
+
+	 	 $("#log").load("./ubernotes/ubernote-py.txt", logKeyUp)
+
+	 	 $("#se").focus();
 
      });
    </script>
