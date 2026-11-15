@@ -1,2 +1,4 @@
 ubernotes/*
 Backups/*
+/version.json
+/_site/

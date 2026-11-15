@@ -1,8 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta charset="utf-8">
 <title>LiveLog</title>
+<link rel="stylesheet" href="release.css">
+<script defer src="app-stamp.js"></script>
 </head>
 <body>
 <!-- included at bottom
@@ -217,5 +220,7 @@ To export letterspace docs:
 		$( "#se" ).autocomplete( "search" , "" )*/
 	});
 	</script>
+<footer class="app-release"><span id="wit-feedback-mount"></span><span data-app-stamp data-show="time" data-src="version.json"></span></footer>
+<script defer src="https://worldissuetracker.com/widget/wit-feedback.js" data-tracker-slug="livelog-feedback" data-app="LiveLog" data-mode="feedback" data-trigger="tab" data-label="Send feedback" data-mount-selector="#wit-feedback-mount"></script>
 </body>
 </html>
